@@ -1,0 +1,7 @@
+name = "EnergySamplers"
+uuid = "dad15e66-0daf-5efc-ba20-16202424f64d"
+authors = ["Patrick Altmeyer <p.altmeyer@tudelft.nl> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1.10"
