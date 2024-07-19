@@ -1,0 +1,13 @@
+---
+format:
+  commonmark:
+    variant: -raw_html+tex_math_dollars
+    wrap: none
+    mermaid-format: png
+crossref:
+  fig-prefix: Figure
+  tbl-prefix: Table
+output: asis
+---
+
+# EnergySamplers
