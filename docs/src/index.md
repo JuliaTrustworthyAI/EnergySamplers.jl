@@ -1,4 +1,6 @@
-```@meta
+
+
+``` @meta
 CurrentModule = EnergySamplers
 ```
 
@@ -6,9 +8,9 @@ CurrentModule = EnergySamplers
 
 Documentation for [EnergySamplers](https://github.com/JuliaTrustworthyAI/EnergySamplers.jl).
 
-```@index
+``` @index
 ```
 
-```@autodocs
+``` @autodocs
 Modules = [EnergySamplers]
 ```
