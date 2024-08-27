@@ -39,8 +39,6 @@ end
 
 # (b) Did someone say render?
 if "--quarto" ∈ ARGS
-    @info "Rendering README"
-    run(`quarto render $(joinpath(@__DIR__, "..", "README.qmd"))`)
     @info "Rendering docs"
     run(`quarto render $(joinpath(@__DIR__, "src"))`)
 end
@@ -55,9 +53,16 @@ makedocs(;
     authors="Patrick Altmeyer and contributors",
     sitename="EnergySamplers.jl",
     format=Documenter.HTML(;
+        canonical="https://JuliaTrustworthyAI.github.io/EnergySamplers.jl",
+        edit_link="main",
         assets=String[],
     ),
     pages=[
         "Home" => "index.md",
     ],
+)
+
+deploydocs(;
+    repo="github.com/JuliaTrustworthyAI/EnergySamplers.jl",
+    devbranch="main",
 )
