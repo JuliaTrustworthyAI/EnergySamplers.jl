@@ -2,5 +2,7 @@ using EnergySamplers
 using Test
 
 @testset "EnergySamplers.jl" begin
-    # Write your tests here.
+    include("aqua.jl")
+
+    include("samplers.jl")
 end
