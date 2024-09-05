@@ -12,23 +12,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v2
-      - uses: julia-actions/cache@v1
-      - name: 'Install JuliaFormatter'
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: 1
+      - uses: actions/checkout@v1
+      - name: Install JuliaFormatter
         run: |
-          julia -e '
-            using Pkg
-            Pkg.add(Pkg.PackageSpec(name="JuliaFormatter", version=get(ENV, "jf-version", "1")))'
-        shell: bash
-        env:
-          jf-version: ${{ inputs.version }}
-      - name: 'Format'
+          using Pkg
+          Pkg.add("JuliaFormatter")
+        shell: julia --color=yes {0}
+      - name: Format code
         run: |
-          julia -e '
-            using JuliaFormatter
-            format(".")'
-        shell: bash
+          using JuliaFormatter
+          format("."; verbose=true)
+        shell: julia --color=yes {0}
       - name: Check for formatting errors
         shell: bash
         run: |
