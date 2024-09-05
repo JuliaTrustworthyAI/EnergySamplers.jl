@@ -14,13 +14,14 @@ Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 
 [compat]
 Aqua = "0.8"
-CategoricalArrays = "0.10.8"
-Distributions = "0.25.111"
-Flux = "0.14.19"
-MLUtils = "0.4.4"
-Optimisers = "0.3.3"
-StatsBase = "0.34.3"
-Tables = "1.12.0"
+CategoricalArrays = "0.10"
+Distributions = "0.25"
+Flux = "0.14"
+MLUtils = "0.4"
+Optimisers = "0.3"
+StatsBase = "0.33, 0.34"
+Tables = "1.12"
+Test = "1.10"
 julia = "1.10"
 
 [extras]
