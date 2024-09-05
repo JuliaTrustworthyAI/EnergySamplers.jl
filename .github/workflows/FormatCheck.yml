@@ -12,17 +12,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: julia-actions/setup-julia@latest
-        with:
-          version: 1
-      - uses: actions/checkout@v1
-      - name: Install JuliaFormatter
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/cache@v1
+      - name: 'Install JuliaFormatter'
         run: |
-          using Pkg
-          Pkg.add("JuliaFormatter")
-        shell: julia --color=yes {0}
-      - name: Format code
+          julia -e '
+            using Pkg
+            Pkg.add(Pkg.PackageSpec(name="JuliaFormatter", version=get(ENV, "jf-version", "1")))'
+        shell: bash
+        env:
+          jf-version: ${{ inputs.version }}
+      - name: 'Format'
         run: |
-          using JuliaFormatter
-          format("."; verbose=true)
-        shell: julia --color=yes {0}
+          julia -e '
+            using JuliaFormatter
+            format(".")'
+        shell: bash
+      - name: Check for formatting errors
+        shell: bash
+        run: |
+          output=$(git diff --name-only)
+          if [ "$output" != "" ]; then
+              >&2 echo "Some files have not been formatted !!!"
+              echo "$output"
+              exit 1
+          fi
