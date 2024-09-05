@@ -16,10 +16,9 @@ struct SGLD <: AbstractSamplingRule
     b::Float64
     gamma::Float64
 end
-SGLD(; a::Real = 10.0, b::Real = 1000.0, γ::Real = 0.9) = SGLD(a, b, γ)
+SGLD(; a::Real=10.0, b::Real=1000.0, γ::Real=0.9) = SGLD(a, b, γ)
 
 function Optimisers.apply!(o::SGLD, state, x::AbstractArray{T}, Δ) where {T}
-
     a, b, γ = T(o.a), T(o.b), T(o.gamma)
 
     εt = @.(a * (b + state)^-γ)
@@ -48,7 +47,7 @@ struct ImproperSGLD <: AbstractSamplingRule
     alpha::Float64
     sigma::Float64
 end
-ImproperSGLD(; α::Real = 2.0, σ::Real = 0.01) = ImproperSGLD(α, σ)
+ImproperSGLD(; α::Real=2.0, σ::Real=0.01) = ImproperSGLD(α, σ)
 
 function Optimisers.apply!(o::ImproperSGLD, state, x::AbstractArray{T}, Δ) where {T}
     α, σ = T(o.alpha), T(o.sigma)
