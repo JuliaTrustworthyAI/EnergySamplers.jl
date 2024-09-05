@@ -2,5 +2,5 @@ using EnergySamplers
 using Test
 
 @testset "EnergySamplers.jl" begin
-    # Write your tests here.
+    include("samplers.jl")
 end
