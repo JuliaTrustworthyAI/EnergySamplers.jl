@@ -2,6 +2,7 @@ project:
   title: "EnergySamplers.jl"
   execute-dir: project
   render:
+    - "*.qmd"
     - "!docs/src/*.md"
 crossref:
   fig-prefix: Figure
