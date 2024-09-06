@@ -11,6 +11,7 @@ output: asis
 engine: julia
 julia: 
   exeflags: ["--project=docs/"]
+bibliography: bib.bib
 ---
 
 # EnergySamplers
