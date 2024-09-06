@@ -13,15 +13,15 @@ The package adds two new optimisers that are compatible with the [Optimisers.jl]
 1.  Stochastic Gradient Langevin Dynamics (SGLD) (Welling and Teh 2011) — [`SGLD`](@ref).
 2.  Improper SGLD (see, for example, Grathwohl et al. (2020)) — [`ImproperSGLD`](@ref).
 
-SGLD is an efficient gradient-based Markov Chain Monte Carlo (MCMC) method that can be used in the context of EBM to draw samples from the model posterior (Murphy 2023). Formally, we can draw from $p_{\theta}(\mathbf{x})$ as follows
+SGLD is an efficient gradient-based Markov Chain Monte Carlo (MCMC) method that can be used in the context of EBM to draw samples from the model posterior (Murphy 2023). Formally, we can draw from $p_{\theta}(x)$ as follows
 
 ``` math
 \begin{aligned}
-    \mathbf{x}_{j+1} &\leftarrow \mathbf{x}_j - \frac{\epsilon_j^2}{2} \nabla_x \mathcal{E}_{\theta}(\mathbf{x}_j) + \epsilon_j \mathbf{r}_j, && j=1,...,J
+    x_{j+1} &\leftarrow x_j - \frac{\epsilon_j^2}{2} \nabla_x \mathcal{E}_{\theta}(x_j) + \epsilon_j r_j, && j=1,...,J
 \end{aligned}
 ```
 
-where $\mathbf{r}_j \sim \mathcal{N}(\mathbf{0},\mathbf{I})$ is a stochastic term and the step-size $\epsilon_j$ is typically polynomially decayed (Welling and Teh 2011). To allow for faster sampling, it is common practice to choose the step-size $\epsilon_j$ and the standard deviation of $\mathbf{r}_j$ separately. While $\mathbf{x}_J$ is only guaranteed to distribute as $p_{\theta}(\mathbf{x})$ if $\epsilon \rightarrow 0$ and $J \rightarrow \infty$, the bias introduced for a small finite $\epsilon$ is negligible in practice (Murphy 2023). We denote this form of sampling as Improper SGLD.
+where $r_j \sim \mathcal{N}(0,I)$ is a stochastic term and the step-size $\epsilon_j$ is typically polynomially decayed (Welling and Teh 2011). To allow for faster sampling, it is common practice to choose the step-size $\epsilon_j$ and the standard deviation of $r_j$ separately. While $x_J$ is only guaranteed to distribute as $p_{\theta}(x)$ if $\epsilon \rightarrow 0$ and $J \rightarrow \infty$, the bias introduced for a small finite $\epsilon$ is negligible in practice (Murphy 2023). We denote this form of sampling as Improper SGLD.
 
 ### Example: Bayesian Inferecne with SGLD
 
@@ -162,9 +162,9 @@ plot(p1, p2, size=(800, 400))
 
 In the context of EBM, the optimisers can be used to sample from a model posterior. To this end, the package provides the following samples:
 
-1.  [`UnconditionalSampler`](@ref) — samples from the unconditional distribution $p_{\theta}(\mathbf{x})$ as in Grathwohl et al. (2020).
-2.  [`ConditionalSampler`](@ref) — samples from the conditional distribution $p_{\theta}(\mathbf{x}|y)$ as in Grathwohl et al. (2020).
-3.  [`JointSampler`](@ref) — samples from the joint distribution $p_{\theta}(\mathbf{x},y)$ as in Kelly, Zemel, and Grathwohl (2021).
+1.  [`UnconditionalSampler`](@ref) — samples from the unconditional distribution $p_{\theta}(x)$ as in Grathwohl et al. (2020).
+2.  [`ConditionalSampler`](@ref) — samples from the conditional distribution $p_{\theta}(x|y)$ as in Grathwohl et al. (2020).
+3.  [`JointSampler`](@ref) — samples from the joint distribution $p_{\theta}(x,y)$ as in Kelly, Zemel, and Grathwohl (2021).
 
 ### Example: Joint Energy-Based Model
 
@@ -217,9 +217,9 @@ end
 ```
 
     [ Info: Epoch 1
-    Accuracy: 0.9995
+    Accuracy: 0.919
     [ Info: Epoch 2
-    Accuracy: 0.9995
+    Accuracy: 0.997
     [ Info: Epoch 3
     Accuracy: 0.9995
     [ Info: Epoch 4
