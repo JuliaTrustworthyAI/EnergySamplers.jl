@@ -7,7 +7,6 @@ format:
 crossref:
   fig-prefix: Figure
   tbl-prefix: Table
-output: asis
 engine: julia
 julia: 
   exeflags: ["--project=docs/"]
