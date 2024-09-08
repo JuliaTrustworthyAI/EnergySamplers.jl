@@ -1,0 +1,15 @@
+---
+engine: julia
+julia: 
+  exeflags: ["--project=../"]
+---
+
+```@meta
+CurrentModule = EnergySamplers
+```
+
+# EnergySamplers
+
+Documentation for [EnergySamplers](https://github.com/JuliaTrustworthyAI/EnergySamplers.jl).
+
+{{< include "_intro.qmd" >}}
