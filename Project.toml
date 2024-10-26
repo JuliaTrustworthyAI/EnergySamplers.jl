@@ -1,7 +1,7 @@
 name = "EnergySamplers"
 uuid = "f446124b-5d5e-4171-a6dd-a1d99768d3ce"
 authors = ["Patrick Altmeyer and contributors"]
-version = "1.0.0"
+version = "1.0.1"
 
 [deps]
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
@@ -21,7 +21,7 @@ MLUtils = "0.4"
 Optimisers = "0.3"
 StatsBase = "0.33, 0.34"
 Tables = "1.12"
-Test = "1.10"
+Test = "1"
 julia = "1.10"
 
 [extras]
