@@ -13,6 +13,8 @@ abstract type AbstractSamplingRule <: Optimisers.AbstractRule end
 "Base type for samplers."
 abstract type AbstractSampler end
 
+const DOC_Grathwohl = "For details see Grathwohl et al. (2020) [[arXiv](https://arxiv.org/abs/1912.03263), [ICLR](https://iclr.cc/virtual_2020/poster_Hkxzx0NtDB.html)]."
+
 export AbstractSampler, AbstractSamplingRule
 export ConditionalSampler, UnconditionalSampler, JointSampler
 export PMC
