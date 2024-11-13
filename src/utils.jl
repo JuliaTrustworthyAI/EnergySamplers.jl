@@ -31,7 +31,7 @@ end
 @doc raw"""
     _energy(f, x, y::Int; agg=mean)
 
-Computes the energy for conditional samples $x \sim p_{\theta}(x|y)$: $E(x)=- f_{\theta}(x)[y]$. $DOC_Grathwohl
+Computes the energy for conditional samples $x \sim p_{\theta}(x|y)$: $E(x)=- f_{\theta}(x)[y]$. Here `f` is the model, `x` is the input and `y` is the **index** of the target label. $DOC_Grathwohl 
 """
 function _energy(f, x, y::Int; agg=mean)
     if f isa Flux.Chain
@@ -52,7 +52,7 @@ end
 @doc raw"""
     energy_differential(f, xgen, xsampled, y::Int; agg=mean)
 
-Computes the energy differential between a conditional sample ``x_{\text{gen}} \sim p_{\theta}(x|y)`` and an observed sample ``x_{\text{sample}} \sim p(x|y)`` as ``E(x_{\text{sample}}|y) - E(x_{\text{gen}}|y)`` with ``E(x|y) = -f_{\theta}(x)[y]``. $DOC_Grathwohl
+Computes the energy differential between a conditional sample ``x_{\text{gen}} \sim p_{\theta}(x|y)`` and an observed sample ``x_{\text{sample}} \sim p(x|y)`` as ``E(x_{\text{sample}}|y) - E(x_{\text{gen}}|y)`` with ``E(x|y) = -f_{\theta}(x)[y]``. Here `f` is the model, `xgen` are the generated samples, `xsampled` are the observed training samples and `y` is the **index** of the target label. $DOC_Grathwohl
 """
 function energy_differential(f, xgen, xsampled, y::Int; agg=mean)
     neg_loss = _energy(f, xgen, y; agg=agg)         # negative loss associated with generated samples
@@ -64,7 +64,7 @@ end
 @doc raw"""
     energy_penalty(f, xgen, xsampled, y::Int; agg=mean)
 
-Computes the a Ridge penalty for the overall energies of the conditional samples ``x_{\text{gen}} \sim p_{\theta}(x|y)`` and an observed sample ``x_{\text{sample}} \sim p(x|y)``. $DOC_Grathwohl
+Computes the a Ridge penalty for the overall energies of the conditional samples ``x_{\text{gen}} \sim p_{\theta}(x|y)`` and an observed sample ``x_{\text{sample}} \sim p(x|y)``. Here `f` is the model, `xgen` are the generated samples, `xsampled` are the observed training samples and `y` is the **index** of the target label. $DOC_Grathwohl
 """
 function energy_penalty(f, xgen, xsampled, y::Int; agg=mean, p=1)
     neg_loss = _energy(f, xgen, y; agg=agg)         # negative loss associated with generated samples

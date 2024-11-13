@@ -1,7 +1,7 @@
 name = "EnergySamplers"
 uuid = "f446124b-5d5e-4171-a6dd-a1d99768d3ce"
 authors = ["Patrick Altmeyer and contributors"]
-version = "1.0.1"
+version = "1.0.2"
 
 [deps]
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
