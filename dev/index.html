@@ -27,41 +27,31 @@ for feature in numerics
     rescale!(test[!, feature], μ, σ; obsdim=1)
 end
 
-prep_X(x) = gpu(Matrix(x)&#39;)
-prep_y(y) = gpu(reshape(y, 1, :))
+prep_X(x) = Matrix(x)&#39;
+prep_y(y) = reshape(y, 1, :)
 train_X, test_X = prep_X.((train[:, features], test[:, features]))
 train_y, test_y = prep_y.((train[:, target], test[:, target]))
-train_set = Flux.DataLoader((train_X, train_y); batchsize=100, shuffle=false)</code></pre><pre><code class="nohighlight hljs">┌ Warning: No functional GPU backend found! Defaulting to CPU.
-│ 
-│ 1. If no GPU is available, nothing needs to be done.
-│ 2. If GPU is available, load the corresponding trigger package.
-│     a. `CUDA.jl` and `cuDNN.jl` (or just `LuxCUDA.jl`) for  NVIDIA CUDA Support.
-│     b. `AMDGPU.jl` for AMD GPU ROCM Support.
-│     c. `Metal.jl` for Apple Metal GPU Support. (Experimental)
-│     d. `oneAPI.jl` for Intel oneAPI GPU Support. (Experimental)
-└ @ MLDataDevices.Internal ~/.julia/packages/MLDataDevices/hoL1S/src/internal.jl:94
-
-70-element DataLoader(::Tuple{LinearAlgebra.Adjoint{Float64, Matrix{Float64}}, Matrix{Float64}}, batchsize=100)
+train_set = Flux.DataLoader((train_X, train_y); batchsize=100, shuffle=false)</code></pre><pre><code class="nohighlight hljs">70-element DataLoader(::Tuple{LinearAlgebra.Adjoint{Float64, Matrix{Float64}}, Matrix{Float64}}, batchsize=100)
   with first element:
   (3×100 Matrix{Float64}, 1×100 Matrix{Float64},)</code></pre><p>Finally, we create a small helper function that runs the training loop for a given optimiser <code>opt</code> and number of <code>steps</code>:</p><pre><code class="language-julia hljs">function train_logreg(; steps::Int=1000, opt=Flux.Descent(2))
     Random.seed!(1)
 
-    paramvec(θ) = reduce(hcat, cpu(θ))
-    model = gpu(Dense(length(features), 1, sigmoid))
+    paramvec(θ) = reduce(hcat, θ)
+    model = Dense(length(features), 1, sigmoid)
     θ = Flux.params(model)
     θ₀ = paramvec(θ)
 
     predict(x; thres=0.5) = model(x) .&gt; thres
-    accuracy(x, y) = mean(cpu(predict(x)) .== cpu(y))
+    accuracy(x, y) = mean(predict(x) .== y)
 
     loss(yhat, y) = Flux.binarycrossentropy(yhat, y)
     avg_loss(yhat, y) = mean(loss(yhat, y))
     trainloss() = avg_loss(model(train_X), train_y)
     testloss() = avg_loss(model(test_X), test_y)
 
-    trainlosses = [cpu(trainloss()); zeros(steps)]
-    testlosses = [cpu(testloss()); zeros(steps)]
-    weights = [cpu(θ₀); zeros(steps, length(θ₀))]
+    trainlosses = [trainloss(); zeros(steps)]
+    testlosses = [testloss(); zeros(steps)]
+    weights = [θ₀; zeros(steps, length(θ₀))]
 
     opt_state = Flux.setup(opt, model)
 
@@ -80,9 +70,9 @@ train_set = Flux.DataLoader((train_X, train_y); batchsize=100, shuffle=false)</c
         end
 
         # Bookkeeping
-        weights[t + 1, :] = cpu(paramvec(θ))
-        trainlosses[t + 1] = cpu(trainloss())
-        testlosses[t + 1] = cpu(testloss())
+        weights[t + 1, :] = paramvec(θ)
+        trainlosses[t + 1] = trainloss()
+        testlosses[t + 1] = testloss()
     end
 
     println(&quot;Final parameters are $(paramvec(θ))&quot;)
@@ -97,11 +87,14 @@ results = train_logreg(; steps=100, opt=ImproperSGLD(2.0, 0.01))
 model, weights, trainlosses, testlosses = results
 p2 = plot(weights; label=[&quot;Student&quot; &quot;Balance&quot; &quot;Income&quot; &quot;Intercept&quot;], plot_title=&quot;Improper SGLD&quot;)
 
-plot(p1, p2, size=(800, 400))</code></pre><pre><code class="nohighlight hljs">┌ Warning: Layer with Float32 parameters got Float64 input.
+plot(p1, p2, size=(800, 400))</code></pre><pre><code class="nohighlight hljs">┌ Warning: `Flux.params(m...)` is deprecated. Use `Flux.trainable(model)` for parameter collection,
+│ and the explicit `gradient(m -&gt; loss(m, x, y), model)` for gradient computation.
+└ @ Flux ~/.julia/packages/Flux/Mhg1r/src/deprecations.jl:93
+┌ Warning: Layer with Float32 parameters got Float64 input.
 │   The input will be converted, but any earlier layers may be very slow.
 │   layer = Dense(3 =&gt; 1, σ)    # 4 parameters
 │   summary(x) = &quot;3×7000 adjoint(::Matrix{Float64}) with eltype Float64&quot;
-└ @ Flux ~/.julia/packages/Flux/vwk6M/src/layers/stateless.jl:59
+└ @ Flux ~/.julia/packages/Flux/Mhg1r/src/layers/stateless.jl:60
 Final parameters are Float32[-2.3311744 1.1305944 -1.5102222 -4.0762844]
 Test accuracy is 0.9666666666666667
 Final parameters are Float32[-0.6106307 2.760134 -0.031244753 -5.8856964]
@@ -175,4 +168,4 @@ plot(plt)</code></pre><pre><code class="nohighlight hljs">┌ Warning: Layer wit
 │   The input will be converted, but any earlier layers may be very slow.
 │   layer = Dense(2 =&gt; 2)       # 6 parameters
 │   summary(x) = &quot;2-element Vector{Float64}&quot;
-└ @ Flux ~/.julia/packages/Flux/vwk6M/src/layers/stateless.jl:59</code></pre><p><img src="index_files/figure-commonmark/cell-8-output-2.svg" alt/></p><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><p>Grathwohl, Will, Kuan-Chieh Wang, Joern-Henrik Jacobsen, David Duvenaud, Mohammad Norouzi, and Kevin Swersky. 2020. “Your Classifier Is Secretly an Energy Based Model and You Should Treat It Like One.” In <em>International Conference on Learning Representations</em>.</p><p>Kelly, Jacob, Richard Zemel, and Will Grathwohl. 2021. “Directly Training Joint Energy-Based Models for Conditional Synthesis and Calibrated Prediction of Multi-Attribute Data.” <a href="https://arxiv.org/abs/2108.04227">https://arxiv.org/abs/2108.04227</a>.</p><p>Murphy, Kevin P. 2023. <em>Probabilistic Machine Learning: Advanced Topics</em>. MIT press.</p><p>Welling, Max, and Yee W Teh. 2011. “Bayesian Learning via Stochastic Gradient Langevin Dynamics.” In <em>Proceedings of the 28th International Conference on Machine Learning (ICML-11)</em>, 681–88. Citeseer.</p></article><nav class="docs-footer"><a class="docs-footer-nextpage" href="reference/">Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Wednesday 13 November 2024 14:37">Wednesday 13 November 2024</span>. Using Julia version 1.10.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+└ @ Flux ~/.julia/packages/Flux/Mhg1r/src/layers/stateless.jl:60</code></pre><p><img src="index_files/figure-commonmark/cell-8-output-2.svg" alt/></p><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><p>Grathwohl, Will, Kuan-Chieh Wang, Joern-Henrik Jacobsen, David Duvenaud, Mohammad Norouzi, and Kevin Swersky. 2020. “Your Classifier Is Secretly an Energy Based Model and You Should Treat It Like One.” In <em>International Conference on Learning Representations</em>.</p><p>Kelly, Jacob, Richard Zemel, and Will Grathwohl. 2021. “Directly Training Joint Energy-Based Models for Conditional Synthesis and Calibrated Prediction of Multi-Attribute Data.” <a href="https://arxiv.org/abs/2108.04227">https://arxiv.org/abs/2108.04227</a>.</p><p>Murphy, Kevin P. 2023. <em>Probabilistic Machine Learning: Advanced Topics</em>. MIT press.</p><p>Welling, Max, and Yee W Teh. 2011. “Bayesian Learning via Stochastic Gradient Langevin Dynamics.” In <em>Proceedings of the 28th International Conference on Machine Learning (ICML-11)</em>, 681–88. Citeseer.</p></article><nav class="docs-footer"><a class="docs-footer-nextpage" href="reference/">Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Thursday 19 December 2024 13:37">Thursday 19 December 2024</span>. Using Julia version 1.10.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
