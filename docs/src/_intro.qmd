@@ -55,8 +55,8 @@ for feature in numerics
     rescale!(test[!, feature], μ, σ; obsdim=1)
 end
 
-prep_X(x) = gpu(Matrix(x)')
-prep_y(y) = gpu(reshape(y, 1, :))
+prep_X(x) = Matrix(x)'
+prep_y(y) = reshape(y, 1, :)
 train_X, test_X = prep_X.((train[:, features], test[:, features]))
 train_y, test_y = prep_y.((train[:, target], test[:, target]))
 train_set = Flux.DataLoader((train_X, train_y); batchsize=100, shuffle=false)
@@ -68,22 +68,22 @@ Finally, we create a small helper function that runs the training loop for a giv
 function train_logreg(; steps::Int=1000, opt=Flux.Descent(2))
     Random.seed!(1)
 
-    paramvec(θ) = reduce(hcat, cpu(θ))
-    model = gpu(Dense(length(features), 1, sigmoid))
+    paramvec(θ) = reduce(hcat, θ)
+    model = Dense(length(features), 1, sigmoid)
     θ = Flux.params(model)
     θ₀ = paramvec(θ)
 
     predict(x; thres=0.5) = model(x) .> thres
-    accuracy(x, y) = mean(cpu(predict(x)) .== cpu(y))
+    accuracy(x, y) = mean(predict(x) .== y)
 
     loss(yhat, y) = Flux.binarycrossentropy(yhat, y)
     avg_loss(yhat, y) = mean(loss(yhat, y))
     trainloss() = avg_loss(model(train_X), train_y)
     testloss() = avg_loss(model(test_X), test_y)
 
-    trainlosses = [cpu(trainloss()); zeros(steps)]
-    testlosses = [cpu(testloss()); zeros(steps)]
-    weights = [cpu(θ₀); zeros(steps, length(θ₀))]
+    trainlosses = [trainloss(); zeros(steps)]
+    testlosses = [testloss(); zeros(steps)]
+    weights = [θ₀; zeros(steps, length(θ₀))]
 
     opt_state = Flux.setup(opt, model)
 
@@ -102,9 +102,9 @@ function train_logreg(; steps::Int=1000, opt=Flux.Descent(2))
         end
 
         # Bookkeeping
-        weights[t + 1, :] = cpu(paramvec(θ))
-        trainlosses[t + 1] = cpu(trainloss())
-        testlosses[t + 1] = cpu(testloss())
+        weights[t + 1, :] = paramvec(θ)
+        trainlosses[t + 1] = trainloss()
+        testlosses[t + 1] = testloss()
     end
 
     println("Final parameters are $(paramvec(θ))")
